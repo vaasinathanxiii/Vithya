@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vithu ma Video 💜</title>
+<link href="https://fonts.googleapis.com/css2?family=Just+Wright&display=swap" rel="stylesheet">
+<style>
+body{
+  margin:0;
+  overflow:hidden;
+  font-family:'Just Wright', cursive;
+  background-color:#000;
+}
+
+/* Space background canvas */
+#spaceCanvas{
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  z-index:-2;
+}
+
+/* video container */
+.video-container{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  text-align:center;
+  width:90%;
+  max-width:700px;
+  z-index:2;
+}
+
+iframe{
+  width:100%;
+  height:500px;
+  border-radius:15px;
+  box-shadow:0 0 40px #9933ff,0 0 80px #66ccff,0 0 120px #ff66cc;
+  margin-bottom:20px;
+  cursor:pointer;
+}
+
+/* Buttons */
+button{
+  font-size:22px;
+  padding:10px 25px;
+  margin:10px auto;
+  display:block;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  color:white;
+  box-shadow:0 0 15px #ff66cc;
+}
+
+#downloadBtn{
+  background:linear-gradient(to right,#ff66cc,#9933ff);
+}
+
+#backBtn{
+  background:linear-gradient(to right,#9933ff,#ff66cc);
+}
+
+/* Particle hearts */
+.particle {
+  position:absolute;
+  font-size:22px;
+  pointer-events:none;
+  animation: floatLove 2.5s ease-out forwards;
+}
+
+@keyframes floatLove {
+  0% { opacity:1; transform:translate(0,0) scale(1);}
+  100% { opacity:0; transform:translate(var(--x), var(--y)) scale(1.5);}
+}
+</style>
+</head>
+<body>
+
+<canvas id="spaceCanvas"></canvas>
+
+<div class="video-container">
+  <!-- YouTube embed -->
+  <iframe 
+    src="https://www.youtube.com/embed/u-G7aMIS5ew?controls=1&autoplay=0" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    allowfullscreen 
+    id="videoIframe"
+    onclick="createVideoParticles()">
+  </iframe>
+
+  <!-- Download button -->
+  <button id="downloadBtn" onclick="downloadVideo()">Download Video</button>
+
+  <!-- Back button -->
+  <button id="backBtn" onclick="goBack()">Back</button>
+</div>
+
+<script>
+/* ---------------- Video Controls ---------------- */
+function downloadVideo(){
+  const videoURL = "https://drive.google.com/uc?export=download&id=1jy5mEdH4Fe5AFw9bt5Tns_MrLf5UQff4";
+  const a = document.createElement('a');
+  a.href = videoURL;
+  a.download = 'VithuMaVideo.mp4';
+  a.click();
+}
+
+function goBack(){
+  window.location.href="index.html";
+}
+
+/* ---------------- Floating hearts on click ---------------- */
+function createVideoParticles(){
+  const iframe = document.getElementById("videoIframe");
+  const rect = iframe.getBoundingClientRect();
+  for(let i=0;i<30;i++){
+    let p=document.createElement("div");
+    p.className="particle";
+    p.innerHTML="💖";
+    p.style.left=(rect.left+rect.width/2)+"px";
+    p.style.top=(rect.top+rect.height/2)+"px";
+    let x=(Math.random()-0.5)*400+"px";
+    let y=(Math.random()-0.5)*400+"px";
+    p.style.setProperty("--x",x);
+    p.style.setProperty("--y",y);
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),2500);
+  }
+}
+
+/* ---------------- Space Canvas ---------------- */
+const spaceCanvas = document.getElementById('spaceCanvas');
+const ctx = spaceCanvas.getContext('2d');
+let stars = [], comets = [];
+
+function resizeCanvas(){
+  spaceCanvas.width = window.innerWidth;
+  spaceCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Stars
+for(let i=0;i<150;i++){
+  stars.push({
+    x:Math.random()*spaceCanvas.width,
+    y:Math.random()*spaceCanvas.height,
+    r:Math.random()*1.5,
+    alpha:Math.random()
+  });
+}
+
+// Comets
+for(let i=0;i<3;i++){
+  comets.push({
+    x:Math.random()*spaceCanvas.width,
+    y:Math.random()*spaceCanvas.height/2,
+    length: Math.random()*80+20,
+    speed: Math.random()*4+2
+  });
+}
+
+function drawSpace(){
+  let grad = ctx.createLinearGradient(0,0,0,spaceCanvas.height);
+  grad.addColorStop(0,'#2e0066');
+  grad.addColorStop(1,'#000010');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,spaceCanvas.width, spaceCanvas.height);
+
+  stars.forEach(s=>{
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,'+s.alpha+')';
+    ctx.fill();
+    s.alpha += (Math.random()-0.5)*0.02;
+    if(s.alpha<0) s.alpha=0;
+    if(s.alpha>1) s.alpha=1;
+  });
+
+  comets.forEach(c=>{
+    ctx.beginPath();
+    ctx.moveTo(c.x,c.y);
+    ctx.lineTo(c.x - c.length, c.y + c.length/4);
+    ctx.strokeStyle='white';
+    ctx.lineWidth=2;
+    ctx.stroke();
+    c.x += c.speed;
+    if(c.x > spaceCanvas.width+100){
+      c.x = -100;
+      c.y = Math.random()*spaceCanvas.height/2;
+    }
+  });
+
+  requestAnimationFrame(drawSpace);
+}
+drawSpace();
+</script>
+
+</body>
+</html>
